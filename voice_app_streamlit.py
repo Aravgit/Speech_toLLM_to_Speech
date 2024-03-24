@@ -110,7 +110,7 @@ from audio_recorder_streamlit import audio_recorder
 #     st.audio(audio_bytes, format="audio/wav")
 
 def main():
-    st.title("KnowledgeX Voice Chat")
+    st.title("Voice Chat with LLM")
     st.header("Ask question in any language")
     audio_bytes = audio_recorder(pause_threshold=10.0, sample_rate=41000)
     if audio_bytes:
