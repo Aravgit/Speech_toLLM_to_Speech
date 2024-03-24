@@ -9,4 +9,4 @@ fastapi
 transformers
 asyncio
 pyaudio
-
+gtts 
