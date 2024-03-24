@@ -50,7 +50,7 @@ def send_file_for_translation(input_data, mode, tgt_lang, src_lang):
             response = requests.post(API_URL, files=files, data=data)
     response_json = response.json()  # Parse the JSON response
     if mode in ["s2tt", "t2tt"]:
-        return response_json.get('translated_text', None)
+        return response_json.get('translated_text', None),response_json.get('src_lang', None)
     elif mode == "t2st":
         return response_json.get('audio_link', None)
             
@@ -73,6 +73,8 @@ frames = []
 stop_flag = threading.Event()
 p = pyaudio.PyAudio()
 stream = None
+
+gtts_language_dict = {'afr':'af','arb':'ar','deu':'de','eng':'en','spa':'es','hin':'hi','cmm':'zh'}
 
 def record_audio():
     global frames, stream, stop_flag
@@ -123,7 +125,7 @@ def main():
         y_resampled = librosa.resample(y, orig_sr=sr, target_sr=16000)  # Resample to 16000Hz
         sf.write('inputre.wav', y_resampled, 16000)   # Save the resampled audio
         file_path = 'inputre.wav'
-        translation = send_file_for_translation(file_path,'s2tt','eng',None)
+        translation,source_lang = send_file_for_translation(file_path,'s2tt','eng',None)
         st.write(f"Question: {translation}")
         ### LLM Processing
         subprocess.run(['python', 'subprocess_fn.py', OUTPUT_FILENAME], capture_output=True, text=True)
@@ -132,10 +134,11 @@ def main():
             answer = file.read()
         st.write(f'LLM output : {answer}')
         ### Text to speech translation
-        final_response = send_file_for_translation(input_data=str(answer),mode='t2tt',tgt_lang='hin',src_lang="eng")
+        final_response = send_file_for_translation(input_data=str(answer),mode='t2tt',tgt_lang=source_lang,src_lang="eng")
         st.write(f'Translated response : {final_response}')
         ###Text to Audio 
-        text_to_audio(text=final_response, lang='hi')
+        gtts_lang_input = gtts_language_dict.get('source_lang', None)
+        text_to_audio(text=final_response, lang=gtts_lang_input)
         audio_path = "output_audio.mp3"
         if os.path.abspath("output_audio.mp3"):
             print('file_exists')
