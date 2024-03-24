@@ -1,0 +1,5 @@
+llama-index==0.8.4
+openai==0.28.1
+!git clone https://github.com/facebookresearch/seamless_communication
+openai-whisper
+streamlit
